@@ -1,61 +1,62 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <cstdlib>
 
 using namespace std;
 
-long tot=0;
-
-void print(vector<int> &vf){
-    for(unsigned int i=0; i<vf.size(); ++i){
-        cout << vf.at(i) << " ";
+void print(vector<int> v){
+    for(size_t j=0; j<v.size(); ++j){
+        cout << v.at(j) << " ";
         }
         cout << endl;
     }
 
-void merge(vector<int> &v1, size_t left, size_t center, size_t right){
-    vector<int> *temp = new vector<int>;
-    size_t i=left, j = center+1;
-    tot += v1.at(left);
-    while((i<center+1) && (j < right+1)){
-        if (v1.at(i) > v1.at(j)){
-            temp->push_back(v1.at(j++));
+size_t selection(vector<int> *v){ //works well
+    size_t dist=0;
+    size_t min;
+    int temp;
+    size_t dim = v->size();
+    for(size_t i=0; i<dim-1; ++i){
+        min = i;
+        for(size_t j = i+1; j<dim; ++j){ //find min value index
+            if (v->at(min) > v->at(j))
+                min=j;
             }
-            else
-                temp->push_back(v1.at(i++));
+            if (min!=i){
+                temp = v->at(min);
+                for(size_t k = min; k>i; --k){ //shift from min to i positions
+                    v->at(k) = v->at(k-1);
+                    }
+                v->at(i) = temp;
+            }
+        //print(*v);
+        dist+=(min-i);
         }
-    while(i<center+1){
-        temp->push_back(v1.at(i++));
-        }
-    while(j<right+1)
-        temp->push_back(v1.at(j++));
-        //print(*temp);
-    for(unsigned int k=left; k<right;++k)
-        v1.at(k) = temp->at(k-left);
+        return dist;
     }
-
-void mergesort(vector<int> &v, size_t left, size_t right){
-    size_t center;
-    if (left<right){
-        center = (right+left) >> 1;
-        mergesort(v, left, center);
-        mergesort(v, center+1, right);
-        merge(v, left, center, right);
-        }
-    }
-
 
 int main(int argc, char **argv)
-{
-    vector<int> v1;
-    v1.push_back(1);
-    v1.push_back(2);
-    v1.push_back(5);
-    v1.push_back(3);
-    v1.push_back(4);
-    v1.push_back(6);
-    mergesort(v1, 0, v1.size()-1);
-    print(v1);
-    cout << tot << endl;
+{   
+    size_t dim, i, dst;
+    int temp;
+	vector<int> *v = new vector<int>;
+    ifstream *in = new ifstream("/home/homer/Documents/prog2/stable_selection_sort/input.txt");
+    ofstream *out = new ofstream("/home/homer/Documents/prog2/stable_selection_sort/output.txt", ios::trunc);
+    while(*in>>dim){
+        i=0;
+        while(i<dim && *in>>temp){
+            v->push_back(temp);
+            ++i;
+            }
+        dst = selection(v);
+        *out << dst << endl;
+        v->clear();
+        }
+    in->close();
+    out->close();
+    free(in);
+    free(out);
+    free(v);
 	return 0;
 }
